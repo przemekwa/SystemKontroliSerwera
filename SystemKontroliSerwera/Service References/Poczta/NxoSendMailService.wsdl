@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:intf="http://xml.apache.org/axis/wsdd/" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:impl="http://xml.apache.org/axis/wsdd/" targetNamespace="http://xml.apache.org/axis/wsdd/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types />
+  <wsdl:message name="SendMailRequest">
+    <wsdl:part name="from" type="xsd:string" />
+    <wsdl:part name="recipent" type="xsd:string" />
+    <wsdl:part name="subject" type="xsd:string" />
+    <wsdl:part name="message" type="xsd:string" />
+  </wsdl:message>
+  <wsdl:message name="SendMailResponse">
+    <wsdl:part name="SendMailReturn" type="xsd:boolean" />
+  </wsdl:message>
+  <wsdl:portType name="SendMailServiceImpl">
+    <wsdl:operation name="SendMail" parameterOrder="from recipent subject message">
+      <wsdl:input name="SendMailRequest" message="impl:SendMailRequest" />
+      <wsdl:output name="SendMailResponse" message="impl:SendMailResponse" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="NxoSendMailServiceSoapBinding" type="impl:SendMailServiceImpl">
+    <wsdlsoap:binding transport="http://schemas.xmlsoap.org/soap/http" style="rpc" />
+    <wsdl:operation name="SendMail">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="SendMailRequest">
+        <wsdlsoap:body use="literal" namespace="http://xml.apache.org/axis/wsdd/" />
+      </wsdl:input>
+      <wsdl:output name="SendMailResponse">
+        <wsdlsoap:body use="literal" namespace="http://xml.apache.org/axis/wsdd/" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="SendMailServiceImplService">
+    <wsdl:port name="NxoSendMailService" binding="impl:NxoSendMailServiceSoapBinding">
+      <wsdlsoap:address location="http://10.150.18.113:8070/NxoSendMailService/services/NxoSendMailService" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
