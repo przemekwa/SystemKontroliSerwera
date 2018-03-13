@@ -11,41 +11,33 @@ namespace PingIVR
 {
     class Program
     {
-        static string IPAddress;
+        static string iPAddress;
         static string option = "";
         static string parametr = "";
         static bool islogEnabled = false;
-        static bool useOption = true;
-        static bool napiszKomunikat = true;
-        static bool komunikatAwaria = true;
-        static int MAX_ILOSC_ZDARZEN = 3;
-        static int iloscZdarzen = 0;
-        static long czasWyslaniaPinga = 10000;
+    
+       
+       
+        
+        static int currentAlertCount = 0;
 
         static void Main(string[] args)
         {
-
             if (args.Length != 0  && args.Length >= 3)
             {
-                
-                IPAddress = args[0];
+                iPAddress = args[0];
                 option = args[1];
                 parametr = args[2];
 
-                for (int i=1;i<args.Length;i++)
+                for (int i = 1; i < args.Length; i++)
                 {
                     if (args[i].Contains("-t"))
                     {
-                        czasWyslaniaPinga = long.Parse(args[i+1]);
+                        var pingTime = long.Parse(args[i + 1]);
                     }
 
-                    if (args[i].Contains("-l"))
-                    {
-                        islogEnabled = true;
-                    }
-
+                    islogEnabled = args[i].Contains("-l");
                 }
-            
 
                 Console.WriteLine("Inicjalizacja SystemuKontroliSerwera " + args[0]);
                 Console.WriteLine("Opcja:  -l (logownie Ping do pliku)");
@@ -54,20 +46,9 @@ namespace PingIVR
                 Console.WriteLine("W razie problemów skorzystam z " + args[1]);
                 Console.WriteLine("Powiadomie: " + args[2]);
                 Console.WriteLine("Logi: " + islogEnabled.ToString());
-                Console.WriteLine("Czas: " + czasWyslaniaPinga.ToString());
-                Console.WriteLine("Ilość zdarzeń: " + MAX_ILOSC_ZDARZEN.ToString());
-
-                
-               
-
+                Console.WriteLine("Czas: " + Consts.PING_TIME.ToString());
+                Console.WriteLine("Ilość zdarzeń: " + Consts.MAX_ALERT_COUNT.ToString());
                 Console.WriteLine("-----------------------------------------------");
-
-
-                TimerCallback tcb = new TimerCallback(WysliPing);
-                Timer wyzwalacz = new Timer(tcb);
-                wyzwalacz.Change(0, czasWyslaniaPinga);
-                Console.Read();
-                wyzwalacz.Dispose();
             }
             else
             {
@@ -77,85 +58,34 @@ namespace PingIVR
                 Console.WriteLine("Opcja:  -t {czas w milisekundach}  (odstępy między Ping-ami)");
                 Console.Read();    
             }
+
+            var model = new PingSenderModel
+            {
+                IpAddress = iPAddress,
+                IslogEnabled = islogEnabled,
+                KomunikatAwaria = true,
+                NapiszKomunikat = true,
+                UseOption = true,
+                Option = option,
+                Parametr = parametr
+            };
+
+            CreateTimer(model);
         }
 
-        static void WysliPing(object adres)
+        private static void CreateTimer(PingSenderModel model)
         {
-            Ping pingIVR = new Ping();
-            PingReply odpowiedzIVR = null;
+            var pingSender = new PingSender(model);
 
-            try
-            {
-                odpowiedzIVR = pingIVR.Send(IPAddress);
+            var timerCallback = new TimerCallback(pingSender.SendPing);
 
-                if (islogEnabled)
-                {
-                    using (StreamWriter plik = new StreamWriter("logi_" + IPAddress + ".log", true))
-                    {
-                        plik.WriteLine("{0} - {1} - {2}", DateTime.Now, odpowiedzIVR.Status, odpowiedzIVR.RoundtripTime);
-                        
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-                Console.Read();
-            }
+            var timer = new Timer(timerCallback);
 
+            timer.Change(0, Consts.PING_TIME);
 
-            switch (odpowiedzIVR.Status)
-            {
+            Console.Read();
 
-                case IPStatus.Success:
-                    useOption = true;
-                    komunikatAwaria = true;
-                    if (napiszKomunikat)
-                    {
-                        Console.WriteLine("{0} {1} {2}", DateTime.Now, "Działa", IPAddress);
-                        napiszKomunikat = false;
-                    }
-                    break;
-
-                default:
-
-                    
-                    napiszKomunikat = true;
-
-                    if (komunikatAwaria)
-                    {
-
-                        Console.WriteLine("{0} {1} {2} {3} {4}", DateTime.Now, "Nie dziala maszyna/serwer", IPAddress, odpowiedzIVR.Status,"IVR-POZ-Numer 1650. IVR-SRO-Numer 1750");
-
-                        if (MAX_ILOSC_ZDARZEN > iloscZdarzen)
-                        {
-
-                            if (option == "sms" && useOption)
-                            {
-                                //sms s = new sms();
-                                //s.WysliSms(adresIP + " nie działa", parametr);
-                                useOption = false;
-                                Console.WriteLine("{0} {1}", DateTime.Now, "Wysłałem sms na numer " + parametr);
-                                iloscZdarzen++;
-                            }
-
-                            if (option == "poczta" && useOption)
-                            {
-                                //Poczta.SendMailServiceImplClient p = new Poczta.SendMailServiceImplClient();
-                                //p.SendMail("przemyslaw.walkowski@bzwbk.pl", parametr, "Aplikacja Systemu Kontroli Serwera", adresIP + " nie odpowiada ping");
-                                useOption = false;
-                                Console.WriteLine("{0} {1}", DateTime.Now, "Wysłałem meila do " + parametr);
-                                iloscZdarzen++;
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine("{0} {1} {2}", DateTime.Now, "Osiagnięto limit zdarzeń:", iloscZdarzen);
-                        }
-                    }
-                    komunikatAwaria = false;
-                    break;
-            }
+            timer.Dispose();
         }
     }
 }
