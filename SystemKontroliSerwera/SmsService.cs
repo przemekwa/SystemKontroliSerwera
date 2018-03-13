@@ -7,9 +7,9 @@ using System.IO;
 
 namespace PingIVR
 {
-    class sms
+    public class SmsService
     {
-        public void WysliSms(string tekst, string telefony)
+        public void Send(string tekst, string telefony)
         {
             string[] numery = telefony.Split(';');
 
@@ -19,11 +19,6 @@ namespace PingIVR
                 WebClient webClient = new WebClient();
                 Stream stream = webClient.OpenRead(URI);
             }
-
-           
         }
-
     }
-
-
 }

@@ -46,7 +46,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Consts.cs" />
-    <Compile Include="Meil.cs" />
     <Compile Include="PingSender.cs" />
     <Compile Include="PingSenderModel.cs" />
     <Compile Include="Program.cs" />
@@ -56,7 +55,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Compile>
-    <Compile Include="sms.cs" />
+    <Compile Include="SmsService.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
