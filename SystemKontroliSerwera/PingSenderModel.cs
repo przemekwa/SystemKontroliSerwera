@@ -10,9 +10,10 @@ namespace PingIVR
         public string IpAddress { get; internal set; }
         public bool IslogEnabled { get; internal set; }
         public bool UseOption { get; internal set; }
-        public bool KomunikatAwaria { get; internal set; }
-        public bool NapiszKomunikat { get; internal set; }
-        public string Option { get; internal set; }
+
+        public bool IsAlertMsg { get; internal set; }
+        public bool WriteMsg { get; internal set; }
+        public AlertType Option { get; internal set; }
         public string Parametr { get; internal set; }
     }
 }

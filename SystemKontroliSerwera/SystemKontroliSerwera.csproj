@@ -34,6 +34,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NDesk.Options, Version=0.2.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NDesk.Options.0.2.1\lib\NDesk.Options.dll</HintPath>
+    </Reference>
+    <Reference Include="NDesk.Options.Extensions, Version=1.4.1.32053, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NDesk.Options.Extensions.1.4.1\lib\net40-client\NDesk.Options.Extensions.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
@@ -64,6 +70,7 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="packages.config" />
     <None Include="Service References\Poczta\NxoSendMailService.wsdl" />
   </ItemGroup>
   <ItemGroup>

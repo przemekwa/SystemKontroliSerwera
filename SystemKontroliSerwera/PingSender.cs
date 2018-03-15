@@ -45,59 +45,62 @@ namespace PingIVR
                 case IPStatus.Success:
                     ProcessSuccess();
                     break;
-
                 default:
-                    pingSenderModel.NapiszKomunikat = true;
-
-                    if (pingSenderModel.KomunikatAwaria == false)
-                    {
-                        break;
-                    }
-
-                    Console.WriteLine($"{DateTime.Now} Ping do {pingSenderModel.IpAddress} nie odpowiada. Rezultat: {reply.Status}");
-
-                    if (Consts.MAX_ALERT_COUNT > currentAlertCount)
-                    {
-                        if (pingSenderModel.Option == "sms" && pingSenderModel.UseOption)
-                        {
-                            //sms s = new sms();
-                            //s.WysliSms(adresIP + " nie działa", parametr);
-                            pingSenderModel.UseOption = false;
-                            Console.WriteLine("{0} {1}", DateTime.Now, "Wysłałem sms na numer " + pingSenderModel.Parametr);
-                            currentAlertCount++;
-                        }
-
-                        if (pingSenderModel.Option == "poczta" && pingSenderModel.UseOption)
-                        {
-                            //Poczta.SendMailServiceImplClient p = new Poczta.SendMailServiceImplClient();
-                            //p.SendMail("przemyslaw.walkowski@bzwbk.pl", parametr, "Aplikacja Systemu Kontroli Serwera", adresIP + " nie odpowiada ping");
-                            pingSenderModel.UseOption = false;
-                            Console.WriteLine("{0} {1}", DateTime.Now, "Wysłałem meila do " + pingSenderModel.Parametr);
-                            currentAlertCount++;
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("{0} {1} {2}", DateTime.Now, "Osiagnięto limit zdarzeń:", currentAlertCount);
-                    }
-
-
-
-
+                    ProcessOtherStatus(reply.Status);
                     break;
             }
+        }
 
+        private void ProcessOtherStatus(IPStatus iPStatus)
+        {
+            pingSenderModel.WriteMsg = true;
+
+            if (pingSenderModel.IsAlertMsg == false)
+            {
+                return;
+            }
+
+            Console.WriteLine($"{DateTime.Now} Ping do {pingSenderModel.IpAddress} nie odpowiada. Rezultat: {iPStatus}");
+
+            if (Consts.MAX_ALERT_COUNT > currentAlertCount)
+            {
+                SendAlert();
+                return;
+            }
+
+            Console.WriteLine("{0} {1} {2}", DateTime.Now, "Osiagnięto limit zdarzeń:", currentAlertCount);
+        }
+
+        private void SendAlert()
+        {
+            if (pingSenderModel.Option == AlertType.SMS && pingSenderModel.UseOption)
+            {
+                //sms s = new sms();
+                //s.WysliSms(adresIP + " nie działa", parametr);
+                pingSenderModel.UseOption = false;
+                Console.WriteLine("{0} {1}", DateTime.Now, "Wysłałem sms na numer " + pingSenderModel.Parametr);
+                currentAlertCount++;
+            }
+
+            if (pingSenderModel.Option == AlertType.MAIL && pingSenderModel.UseOption)
+            {
+                //Poczta.SendMailServiceImplClient p = new Poczta.SendMailServiceImplClient();
+                //p.SendMail("przemyslaw.walkowski@bzwbk.pl", parametr, "Aplikacja Systemu Kontroli Serwera", adresIP + " nie odpowiada ping");
+                pingSenderModel.UseOption = false;
+                Console.WriteLine("{0} {1}", DateTime.Now, "Wysłałem meila do " + pingSenderModel.Parametr);
+                currentAlertCount++;
+            }
         }
 
         private void ProcessSuccess()
         {
             pingSenderModel.UseOption = true;
-            pingSenderModel.KomunikatAwaria = true;
+            pingSenderModel.IsAlertMsg = true;
 
-            if (pingSenderModel.NapiszKomunikat)
+            if (pingSenderModel.WriteMsg)
             {
                 Console.WriteLine("{0} {1} {2}", DateTime.Now, "Działa", pingSenderModel.IpAddress);
-                pingSenderModel.NapiszKomunikat = false;
+                pingSenderModel.WriteMsg = false;
             }
         }
     }
